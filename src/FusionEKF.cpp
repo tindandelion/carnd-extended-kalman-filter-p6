@@ -8,6 +8,9 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using std::vector;
 
+static int noise_ax = 9, noise_ay = 9;
+static MatrixXd Q_noise = MatrixXd(2, 2);
+
 /*
  * Constructor.
  */
@@ -36,8 +39,9 @@ FusionEKF::FusionEKF() {
     * Finish initializing the FusionEKF.
     * Set the process and measurement noises
   */
-
-
+  Q_noise <<
+    noise_ax, 0,
+    0, noise_ay;
 }
 
 /**
@@ -62,6 +66,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
     ekf_.x_ << 1, 1, 1, 1;
+
+    ekf_.F_ = MatrixXd(4, 4);
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
@@ -90,7 +96,24 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      * Update the process noise covariance matrix.
      * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
    */
+  double time_delta = measurement_pack.timestamp_ - previous_timestamp_;
+  previous_timestamp_ = measurement_pack.timestamp_;
 
+  ekf_.F_ <<
+    1, 0, time_delta, 0,
+    0, 1, 0, time_delta,
+    0, 0, 1, 0,
+    0, 0, 0, 1;
+
+
+  MatrixXd G = MatrixXd(4, 2);
+  G <<
+    time_delta * time_delta / 2, 0,
+    0, time_delta * time_delta / 2,
+    time_delta, 0,
+    0, time_delta;
+
+  ekf_.Q_ = G * Q_noise * G.transpose();
   ekf_.Predict();
 
   /*****************************************************************************
