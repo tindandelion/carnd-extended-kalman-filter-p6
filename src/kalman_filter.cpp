@@ -25,6 +25,7 @@ void KalmanFilter::Predict() {
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
+  x_ << z[0], z[1], 0, 0;
   /**
   TODO:
     * update the state by using Kalman Filter equations
