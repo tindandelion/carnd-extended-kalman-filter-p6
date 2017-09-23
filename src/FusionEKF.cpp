@@ -109,7 +109,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    */
   double time_delta = (measurement_pack.timestamp_ - previous_timestamp_) / 1e6;
   previous_timestamp_ = measurement_pack.timestamp_;
-  cout << "time_delta = " << time_delta << endl;
 
   ekf_.F_ <<
     1, 0, time_delta, 0,
@@ -139,7 +138,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    */
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-    // Radar updates
+    cout << "Radar data = " << endl << measurement_pack.raw_measurements_ << endl;
   } else {
     ekf_.H_ = H_laser_;
     ekf_.R_ = R_laser_;
