@@ -33,17 +33,6 @@ void KalmanFilter::Update(const VectorXd &z) {
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  double ro = z[0];
-  double phi = z[1];
-  double rodot = z[2];
-
-  double px = ro * cos(phi);
-  double py = ro * sin(phi);
-
-  double vx = rodot * cos(phi);
-  double vy = rodot * sin(phi);
-
-  x_ << px, py, vx, vy; 
   
   /**
   TODO:
