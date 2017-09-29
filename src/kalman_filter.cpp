@@ -20,6 +20,17 @@ VectorXd h(const VectorXd& x) {
   return res;
 }
 
+double NormAngle(double angle) {
+  if (angle > M_PI) {
+    angle = angle - 2 * M_PI;
+  } else if (angle < -M_PI) {
+    angle = angle + 2 * M_PI;
+  };
+  return angle;
+}
+
+
+
 KalmanFilter::KalmanFilter() {}
 
 KalmanFilter::~KalmanFilter() {}
@@ -48,7 +59,14 @@ void KalmanFilter::Update(const VectorXd &z) {
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  VectorXd y = z - h(x_);
+  VectorXd h_calc = h(x_);
+  VectorXd y = z - h_calc;
+  y[1] = NormAngle(y[1]);
+    
+  cout << "Z" << ";" << z[0] << ";" << z[1] << ";" << z[2] << endl;
+  cout << "H" << ";" << h_calc[0] << ";" << h_calc[1] << ";" << h_calc[2] << endl;
+  cout << "Y" << ";" << y[0] << ";" << y[1] << ";" << y[2] << endl;
+  
   MatrixXd S = H_ * P_ * H_.transpose() + R_;
   MatrixXd K = P_ * H_.transpose() * S.inverse();
   x_ = x_ + K * y;
