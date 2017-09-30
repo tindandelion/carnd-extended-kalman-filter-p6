@@ -55,9 +55,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // first measurement
     cout << "EKF: " << endl;
 
-    ekf_.F_ = MatrixXd(4, 4);
-    
-
     previous_timestamp_ = measurement_pack.timestamp_;
 
     const VectorXd& z = measurement_pack.raw_measurements_;
@@ -101,9 +98,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   model.Predict(time_delta);
   
-  ekf_.F_ = model.F;
-  ekf_.Q_ = model.Q;
-  ekf_.Predict();
+  ekf_.x_ = model.x;
+  ekf_.P_ = model.P;
 
   /*****************************************************************************
    *  Update
@@ -124,4 +120,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     ekf_.R_ = R_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
   }
+  model.x = ekf_.x_;
+  model.P = ekf_.P_;
 }

@@ -29,6 +29,11 @@ private:
       0, 0, 1, 0,
       0, 0, 0, 1;
   }
+
+  void UpdateState() {
+    x = F * x;
+    P = F * P * F.transpose() + Q;
+  }
   
 public:
   VectorXd x;
@@ -58,6 +63,7 @@ public:
   void Predict(double time_delta) {
     CalculateProcessNoise(time_delta);
     CalculateProcessChange(time_delta);
+    UpdateState();
   }
   
 };
