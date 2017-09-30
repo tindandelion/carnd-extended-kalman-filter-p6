@@ -1,10 +1,6 @@
-#include <iostream>
 #include "FusionEKF.h"
 
-using namespace std;
-using Eigen::MatrixXd;
 using Eigen::VectorXd;
-using std::vector;
 
 MeasurementModel& FusionEKF::SelectModel(MeasurementPackage::SensorType sensor) {
   if (sensor == MeasurementPackage::RADAR) {
