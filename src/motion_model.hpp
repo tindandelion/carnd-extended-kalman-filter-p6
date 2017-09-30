@@ -9,7 +9,9 @@ using Eigen::VectorXd;
 
 class MotionModel {
 private:
-  MatrixXd acc_noise_cov;
+  MatrixXd F;
+  MatrixXd Q;
+  MatrixXd Qa;
 
   void CalculateProcessNoise(double time_delta) {
     MatrixXd G = MatrixXd(4, 2);
@@ -19,7 +21,7 @@ private:
       time_delta, 0,
       0, time_delta;
     
-    Q = G * acc_noise_cov * G.transpose();
+    Q = G * Qa * G.transpose();
   }
 
   void CalculateProcessChange(double time_delta) {
@@ -38,15 +40,13 @@ private:
 public:
   VectorXd x;
   MatrixXd P;
-  MatrixXd F;
-  MatrixXd Q;
   MotionModel(double acc_noise_variance):
     x(VectorXd::Zero(4)),
     P(MatrixXd::Zero(4, 4)),
     F(MatrixXd::Zero(4, 4)),
     Q(MatrixXd::Zero(4, 4)),
-    acc_noise_cov(MatrixXd(2 ,2)) {
-    acc_noise_cov <<
+    Qa(MatrixXd(2 ,2)) {
+    Qa <<
       acc_noise_variance, 0,
       0, acc_noise_variance;
   }
