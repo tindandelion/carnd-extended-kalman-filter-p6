@@ -7,6 +7,7 @@
 #include <string>
 #include <fstream>
 #include "kalman_filter.h"
+#include "motion_model.h"
 #include "tools.h"
 
 class FusionEKF {
@@ -17,6 +18,7 @@ public:
   void ProcessMeasurement(const MeasurementPackage &measurement_pack);
   VectorXd GetEstimate() const { return ekf_.x_; }
 private:
+  MotionModel model;
   KalmanFilter ekf_;
   // check whether the tracking toolbox was initialized or not (first measurement)
   bool is_initialized_;

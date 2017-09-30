@@ -8,13 +8,13 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using std::vector;
 
-static int noise_ax = 9, noise_ay = 9;
-static MatrixXd Q_noise = MatrixXd(2, 2);
+const static int acc_noise_var = 9;
+
 
 /*
  * Constructor.
  */
-FusionEKF::FusionEKF() {
+FusionEKF::FusionEKF(): model(acc_noise_var) {
   is_initialized_ = false;
 
   previous_timestamp_ = 0;
@@ -38,13 +38,9 @@ FusionEKF::FusionEKF() {
     1, 0, 0, 0,
     0, 1, 0, 0;
 
-  Q_noise <<
-    noise_ax, 0,
-    0, noise_ay;
 }
 
 void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
-
 
   /*****************************************************************************
    *  Initialization
@@ -104,21 +100,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   double time_delta = (measurement_pack.timestamp_ - previous_timestamp_) / 1e6;
   previous_timestamp_ = measurement_pack.timestamp_;
   cout << "T" << ";" << time_delta << endl;
-  ekf_.F_ <<
-    1, 0, time_delta, 0,
-    0, 1, 0, time_delta,
-    0, 0, 1, 0,
-    0, 0, 0, 1;
 
-
-  MatrixXd G = MatrixXd(4, 2);
-  G <<
-    time_delta * time_delta / 2, 0,
-    0, time_delta * time_delta / 2,
-    time_delta, 0,
-    0, time_delta;
-
-  ekf_.Q_ = G * Q_noise * G.transpose();
+  model.Predict(time_delta);
+  
+  ekf_.F_ = model.F;
+  ekf_.Q_ = model.Q;
   ekf_.Predict();
 
   /*****************************************************************************
