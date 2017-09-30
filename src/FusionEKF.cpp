@@ -10,7 +10,24 @@ using std::vector;
 
 const static int acc_noise_var = 9;
 
+class LaserMeasurementModel: public MeasurementModel {
+public:
+  void InitState(const VectorXd& measurement, VectorXd& state) const {
+    state << measurement[0], measurement[1], 0, 0;
+  }
+};
 
+class RadarMeasurementModel: public MeasurementModel {
+public:
+  void InitState(const VectorXd& measurement, VectorXd& state) const {
+    double rho = measurement[0], phi = measurement[1], rhodot = measurement[2];
+    state <<
+      rho * cos(phi),
+      rho * sin(phi),
+      rhodot * cos(phi),
+      rhodot * sin(phi);
+  }
+};
 /*
  * Constructor.
  */
@@ -58,21 +75,16 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     previous_timestamp_ = measurement_pack.timestamp_;
 
     const VectorXd& z = measurement_pack.raw_measurements_;
-    VectorXd x0(4);
-    
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      double rho = z[0], phi = z[1], rhodot = z[2];
-      x0 <<
-	rho * cos(phi),
-	rho * sin(phi),
-	rhodot * cos(phi),
-	rhodot * sin(phi);
+      const MeasurementModel& measurementModel = RadarMeasurementModel();
+      model.Init(z, measurementModel);
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
-      x0 << z[0], z[1], 0, 0;
+      const MeasurementModel& measurementModel = LaserMeasurementModel();
+      model.Init(z, measurementModel);
     }
 
-    model.Init(x0);
+
     ekf_.x_ = model.x;
     ekf_.P_ = model.P;
 

@@ -6,6 +6,10 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
+class MeasurementModel {
+public:
+  virtual void InitState(const VectorXd& measurement, VectorXd& state) const = 0;
+};
 
 class MotionModel {
 private:
@@ -32,7 +36,7 @@ private:
       0, 0, 0, 1;
   }
 
-  void UpdateState() {
+  void PredictState() {
     x = F * x;
     P = F * P * F.transpose() + Q;
   }
@@ -51,8 +55,8 @@ public:
       0, acc_noise_variance;
   }
 
-  void Init(const VectorXd& x0) {
-    x = x0;
+  void Init(const VectorXd& measurement, const MeasurementModel& measurement_model) {
+    measurement_model.InitState(measurement, x);
     P <<
       1000, 0, 0, 0,
       0, 1000, 0, 0,
@@ -63,7 +67,7 @@ public:
   void Predict(double time_delta) {
     CalculateProcessNoise(time_delta);
     CalculateProcessChange(time_delta);
-    UpdateState();
+    PredictState();
   }
   
 };
