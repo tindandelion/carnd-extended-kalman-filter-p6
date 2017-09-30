@@ -49,7 +49,7 @@ public:
     P(MatrixXd::Zero(4, 4)),
     F(MatrixXd::Zero(4, 4)),
     Q(MatrixXd::Zero(4, 4)),
-    Qa(MatrixXd(2 ,2)) {
+    Qa(2, 2) {
     Qa <<
       noise_ax, 0,
       0, noise_ay;

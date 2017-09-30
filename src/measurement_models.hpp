@@ -14,7 +14,7 @@ private:
   MatrixXd H;
 
 public:
-  LaserMeasurementModel(): R(MatrixXd(2, 2)), H(MatrixXd(2, 4)) {
+  LaserMeasurementModel(): R(2, 2), H(2, 4) {
     R <<
       0.0225, 0,
       0, 0.0225;
@@ -86,7 +86,7 @@ private:
   
 
 public:
-  RadarMeasurementModel(): R(MatrixXd(3, 3)) {
+  RadarMeasurementModel(): R(3, 3) {
     R <<
       0.09, 0, 0,
       0, 0.0009, 0,
