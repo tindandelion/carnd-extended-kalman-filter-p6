@@ -4,22 +4,22 @@
 class RMSE {
 private:
   static const VectorXd zero;
-  VectorXd mse;
+  
+  VectorXd accum;
   int count;
   
 public:
-  RMSE(): count(0), mse(zero) {
-  }
+ RMSE(): count(0), accum(zero) { }
 
   void Push(const VectorXd& estimate, const VectorXd& truth) {
     VectorXd error = (estimate - truth).array().square();
     
-    mse = mse + error;
+    accum = accum + error;
     count++;
   }
 
   VectorXd Get() const {
-    return (count == 0) ? zero : (mse/count).array().sqrt();
+    return (count == 0) ? zero : (accum/count).array().sqrt();
   }
 };
 

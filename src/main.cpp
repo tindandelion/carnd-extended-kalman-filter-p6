@@ -3,7 +3,7 @@
 #include "json.hpp"
 #include <math.h>
 #include "FusionEKF.h"
-#include "rmse.h"
+#include "rmse.hpp"
 
 using namespace std;
 using json = nlohmann::json;
