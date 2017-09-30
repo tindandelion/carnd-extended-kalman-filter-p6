@@ -31,15 +31,28 @@ private:
   }
   
 public:
+  VectorXd x;
+  MatrixXd P;
   MatrixXd F;
   MatrixXd Q;
   MotionModel(double acc_noise_variance):
+    x(VectorXd::Zero(4)),
+    P(MatrixXd::Zero(4, 4)),
     F(MatrixXd::Zero(4, 4)),
     Q(MatrixXd::Zero(4, 4)),
     acc_noise_cov(MatrixXd(2 ,2)) {
     acc_noise_cov <<
       acc_noise_variance, 0,
       0, acc_noise_variance;
+  }
+
+  void Init(const VectorXd& x0) {
+    x = x0;
+    P <<
+      1000, 0, 0, 0,
+      0, 1000, 0, 0,
+      0, 0, 1000, 0,
+      0, 0, 0, 1000;
   }
 
   void Predict(double time_delta) {
