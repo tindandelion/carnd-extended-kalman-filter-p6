@@ -1,5 +1,6 @@
 #include "FusionEKF.h"
 #include "tools.h"
+#include "measurement_models.hpp"
 #include "Eigen/Dense"
 #include <iostream>
 
@@ -10,24 +11,6 @@ using std::vector;
 
 const static int noise_axy = 9;
 
-class LaserMeasurementModel: public MeasurementModel {
-public:
-  void InitState(const VectorXd& measurement, VectorXd& state) const {
-    state << measurement[0], measurement[1], 0, 0;
-  }
-};
-
-class RadarMeasurementModel: public MeasurementModel {
-public:
-  void InitState(const VectorXd& measurement, VectorXd& state) const {
-    double rho = measurement[0], phi = measurement[1], rhodot = measurement[2];
-    state <<
-      rho * cos(phi),
-      rho * sin(phi),
-      rhodot * cos(phi),
-      rhodot * sin(phi);
-  }
-};
 /*
  * Constructor.
  */
@@ -37,28 +20,14 @@ FusionEKF::FusionEKF(): model(noise_axy, noise_axy) {
   previous_timestamp_ = 0;
 
   // initializing matrices
-  R_laser_ = MatrixXd(2, 2);
-  R_radar_ = MatrixXd(3, 3);
-  H_laser_ = MatrixXd(2, 4);
   Hj_ = MatrixXd(3, 4);
 
-  //measurement covariance matrix - laser
-  R_laser_ << 0.0225, 0,
-        0, 0.0225;
-
-  //measurement covariance matrix - radar
-  R_radar_ << 0.09, 0, 0,
-        0, 0.0009, 0,
-        0, 0, 0.09;
-
-  H_laser_ <<
-    1, 0, 0, 0,
-    0, 1, 0, 0;
-
+  R_radar_ = radar.R;
 }
 
 void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
-
+  const VectorXd& z = measurement_pack.raw_measurements_;
+  
   /*****************************************************************************
    *  Initialization
    ****************************************************************************/
@@ -74,14 +43,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
     previous_timestamp_ = measurement_pack.timestamp_;
 
-    const VectorXd& z = measurement_pack.raw_measurements_;
+
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      const MeasurementModel& measurementModel = RadarMeasurementModel();
-      model.Init(z, measurementModel);
+      model.Init(z, radar);
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
-      const MeasurementModel& measurementModel = LaserMeasurementModel();
-      model.Init(z, measurementModel);
+      model.Init(z, laser);
     }
 
 
@@ -125,13 +92,15 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     ekf_.H_ = tools.CalculateJacobian(ekf_.x_);
-    ekf_.R_ = R_radar_;
+    ekf_.R_ = radar.R;
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
+    
+    model.x = ekf_.x_;
+    model.P = ekf_.P_;
   } else {
-    ekf_.H_ = H_laser_;
-    ekf_.R_ = R_laser_;
-    ekf_.Update(measurement_pack.raw_measurements_);
+    laser.UpdateState(z, model.x, model.P);
+
+    ekf_.x_ = model.x;
+    ekf_.P_ = model.P;
   }
-  model.x = ekf_.x_;
-  model.P = ekf_.P_;
 }
