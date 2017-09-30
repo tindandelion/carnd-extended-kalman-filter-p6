@@ -1,8 +1,5 @@
-#include "FusionEKF.h"
-#include "tools.h"
-#include "measurement_models.hpp"
-#include "Eigen/Dense"
 #include <iostream>
+#include "FusionEKF.h"
 
 using namespace std;
 using Eigen::MatrixXd;
