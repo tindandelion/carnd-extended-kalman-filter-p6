@@ -8,7 +8,7 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using std::vector;
 
-const static int acc_noise_var = 9;
+const static int noise_axy = 9;
 
 class LaserMeasurementModel: public MeasurementModel {
 public:
@@ -31,7 +31,7 @@ public:
 /*
  * Constructor.
  */
-FusionEKF::FusionEKF(): model(acc_noise_var) {
+FusionEKF::FusionEKF(): model(noise_axy, noise_axy) {
   is_initialized_ = false;
 
   previous_timestamp_ = 0;

@@ -44,15 +44,15 @@ private:
 public:
   VectorXd x;
   MatrixXd P;
-  MotionModel(double acc_noise_variance):
+  MotionModel(double noise_ax, double noise_ay):
     x(VectorXd::Zero(4)),
     P(MatrixXd::Zero(4, 4)),
     F(MatrixXd::Zero(4, 4)),
     Q(MatrixXd::Zero(4, 4)),
     Qa(MatrixXd(2 ,2)) {
     Qa <<
-      acc_noise_variance, 0,
-      0, acc_noise_variance;
+      noise_ax, 0,
+      0, noise_ay;
   }
 
   void Init(const VectorXd& measurement, const MeasurementModel& measurement_model) {
