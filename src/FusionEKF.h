@@ -11,19 +11,9 @@
 
 class FusionEKF {
 public:
-  /**
-  * Constructor.
-  */
+
   FusionEKF();
 
-  /**
-  * Destructor.
-  */
-  virtual ~FusionEKF();
-
-  /**
-  * Run the whole flow of the Kalman Filter from here.
-  */
   void ProcessMeasurement(const MeasurementPackage &measurement_pack);
   VectorXd GetEstimate() const { return ekf_.x_; }
 private:

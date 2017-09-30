@@ -43,11 +43,6 @@ FusionEKF::FusionEKF() {
     0, noise_ay;
 }
 
-/**
-* Destructor.
-*/
-FusionEKF::~FusionEKF() {}
-
 void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
 
