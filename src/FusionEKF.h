@@ -7,7 +7,7 @@
 #include <string>
 #include <fstream>
 #include "kalman_filter.h"
-#include "motion_model.h"
+#include "motion_model.hpp"
 #include "tools.h"
 
 class FusionEKF {
