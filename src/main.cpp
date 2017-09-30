@@ -3,12 +3,33 @@
 #include "json.hpp"
 #include <math.h>
 #include "FusionEKF.h"
-#include "tools.h"
 
 using namespace std;
-
-// for convenience
 using json = nlohmann::json;
+
+class RMSE {
+private:
+  static const VectorXd zero;
+  VectorXd mse;
+  int count;
+  
+public:
+  RMSE(): count(0), mse(zero) {
+  }
+
+  void Push(const VectorXd& estimate, const VectorXd& truth) {
+    VectorXd error = (estimate - truth).array().square();
+    
+    mse = mse + error;
+    count++;
+  }
+
+  VectorXd Get() const {
+    return (count == 0) ? zero : (mse/count).array().sqrt();
+  }
+};
+
+const VectorXd RMSE::zero = VectorXd::Zero(4);
 
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
@@ -32,13 +53,9 @@ int main()
 
   // Create a Kalman Filter instance
   FusionEKF fusionEKF;
+  RMSE rmse;
 
-  // used to compute the RMSE later
-  Tools tools;
-  vector<VectorXd> estimations;
-  vector<VectorXd> ground_truth;
-
-  h.onMessage([&fusionEKF,&tools,&estimations,&ground_truth](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&fusionEKF,&rmse](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -103,36 +120,22 @@ int main()
     	  gt_values(1) = y_gt; 
     	  gt_values(2) = vx_gt;
     	  gt_values(3) = vy_gt;
-    	  ground_truth.push_back(gt_values);
           
           //Call ProcessMeasurment(meas_package) for Kalman filter
     	  fusionEKF.ProcessMeasurement(meas_package);    	  
-
-    	  //Push the current estimated x,y positon from the Kalman filter's state vector
-
-    	  VectorXd estimate(4);
-
-    	  double p_x = fusionEKF.ekf_.x_(0);
-    	  double p_y = fusionEKF.ekf_.x_(1);
-    	  double v1  = fusionEKF.ekf_.x_(2);
-    	  double v2 = fusionEKF.ekf_.x_(3);
-
-    	  estimate(0) = p_x;
-    	  estimate(1) = p_y;
-    	  estimate(2) = v1;
-    	  estimate(3) = v2;
-    	  
-    	  estimations.push_back(estimate);
-
-    	  VectorXd RMSE = tools.CalculateRMSE(estimations, ground_truth);
+    	  VectorXd estimate = fusionEKF.GetEstimate();
+	  
+	  //Push the current estimated x,y positon from the Kalman filter's state vector
+	  rmse.Push(estimate, gt_values);
+	  VectorXd rmse_value = rmse.Get();
 
           json msgJson;
-          msgJson["estimate_x"] = p_x;
-          msgJson["estimate_y"] = p_y;
-          msgJson["rmse_x"] =  RMSE(0);
-          msgJson["rmse_y"] =  RMSE(1);
-          msgJson["rmse_vx"] = RMSE(2);
-          msgJson["rmse_vy"] = RMSE(3);
+          msgJson["estimate_x"] = estimate[0];
+          msgJson["estimate_y"] = estimate[1];
+          msgJson["rmse_x"] =  rmse_value(0);
+          msgJson["rmse_y"] =  rmse_value(1);
+          msgJson["rmse_vx"] = rmse_value(2);
+          msgJson["rmse_vy"] = rmse_value(3);
           auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
           // std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);

@@ -25,13 +25,9 @@ public:
   * Run the whole flow of the Kalman Filter from here.
   */
   void ProcessMeasurement(const MeasurementPackage &measurement_pack);
-
-  /**
-  * Kalman Filter update and prediction math lives in here.
-  */
-  KalmanFilter ekf_;
-
+  VectorXd GetEstimate() const { return ekf_.x_; }
 private:
+  KalmanFilter ekf_;
   // check whether the tracking toolbox was initialized or not (first measurement)
   bool is_initialized_;
 
