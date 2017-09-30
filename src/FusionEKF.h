@@ -17,7 +17,7 @@ public:
   FusionEKF();
 
   void ProcessMeasurement(const MeasurementPackage &measurement_pack);
-  VectorXd GetEstimate() const { return ekf_.x_; }
+  VectorXd GetEstimate() const { return model.x; }
 private:
   MotionModel model;
   LaserMeasurementModel laser;
@@ -31,8 +31,6 @@ private:
 
   // tool object used to compute Jacobian and RMSE
   Tools tools;
-  Eigen::MatrixXd R_radar_;
-  Eigen::MatrixXd Hj_;
 };
 
 #endif /* FusionEKF_H_ */

@@ -16,13 +16,7 @@ const static int noise_axy = 9;
  */
 FusionEKF::FusionEKF(): model(noise_axy, noise_axy) {
   is_initialized_ = false;
-
   previous_timestamp_ = 0;
-
-  // initializing matrices
-  Hj_ = MatrixXd(3, 4);
-
-  R_radar_ = radar.R;
 }
 
 void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
@@ -51,10 +45,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       model.Init(z, laser);
     }
 
-
-    ekf_.x_ = model.x;
-    ekf_.P_ = model.P;
-
     // done initializing, no need to predict or update
     is_initialized_ = true;
     return;
@@ -77,30 +67,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   model.Predict(time_delta);
   
-  ekf_.x_ = model.x;
-  ekf_.P_ = model.P;
-
   /*****************************************************************************
    *  Update
    ****************************************************************************/
 
-  /**
-   TODO:
-     * Use the sensor type to perform the update step.
-     * Update the state and covariance matrices.
-   */
-
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-    ekf_.H_ = tools.CalculateJacobian(ekf_.x_);
-    ekf_.R_ = radar.R;
-    ekf_.UpdateEKF(measurement_pack.raw_measurements_);
-    
-    model.x = ekf_.x_;
-    model.P = ekf_.P_;
+    radar.UpdateState(z, model.x, model.P);
   } else {
     laser.UpdateState(z, model.x, model.P);
-
-    ekf_.x_ = model.x;
-    ekf_.P_ = model.P;
   }
 }

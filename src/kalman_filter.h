@@ -11,12 +11,6 @@ public:
   // state covariance matrix
   Eigen::MatrixXd P_;
 
-  // measurement matrix
-  Eigen::MatrixXd H_;
-
-  // measurement covariance matrix
-  Eigen::MatrixXd R_;
-
   /**
    * Constructor
    */
