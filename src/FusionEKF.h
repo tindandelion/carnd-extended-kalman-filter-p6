@@ -9,16 +9,20 @@
 
 class FusionEKF {
 public:
-  FusionEKF();
   void ProcessMeasurement(const MeasurementPackage &measurement_pack);
-  VectorXd GetEstimate() const { return model.x; }
+  const VectorXd& GetEstimate() const { return model.GetState(); }
   
 private:
-  MotionModel model;
+  static const int noise_axy = 9;
+  
+  MotionModel model = MotionModel(noise_axy, noise_axy);
   LaserMeasurementModel laser;
   RadarMeasurementModel radar;
-  bool is_initialized_;
-  long long previous_timestamp_;
+  
+  bool is_initialized_ = false;
+  long long previous_timestamp_ = 0;
+
+  MeasurementModel& SelectModel(MeasurementPackage::SensorType sensor);
 };
 
 #endif /* FusionEKF_H_ */

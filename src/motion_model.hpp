@@ -9,10 +9,14 @@ using Eigen::VectorXd;
 class MeasurementModel {
 public:
   virtual void InitState(const VectorXd& measurement, VectorXd& state) const = 0;
+  virtual void UpdateState(const VectorXd& measurement, VectorXd& state, MatrixXd& cov) const = 0;
 };
 
 class MotionModel {
 private:
+  VectorXd x;
+  MatrixXd P;
+
   MatrixXd F;
   MatrixXd Q;
   MatrixXd Qa;
@@ -42,8 +46,6 @@ private:
   }
   
 public:
-  VectorXd x;
-  MatrixXd P;
   MotionModel(double noise_ax, double noise_ay):
     x(VectorXd::Zero(4)),
     P(MatrixXd::Zero(4, 4)),
@@ -53,6 +55,10 @@ public:
     Qa <<
       noise_ax, 0,
       0, noise_ay;
+  }
+
+  const VectorXd& GetState() const {
+    return x;
   }
 
   void Init(const VectorXd& measurement, const MeasurementModel& measurement_model) {
@@ -68,6 +74,10 @@ public:
     CalculateProcessNoise(time_delta);
     CalculateProcessChange(time_delta);
     PredictState();
+  }
+
+  void Update(const VectorXd& measurement, const MeasurementModel& measurement_model) {
+    measurement_model.UpdateState(measurement, x, P);
   }
   
 };
