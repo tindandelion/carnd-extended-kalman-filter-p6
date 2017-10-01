@@ -9,7 +9,7 @@ private:
   int count;
   
 public:
- RMSE(): count(0), accum(zero) { }
+  RMSE(): count(0), accum(zero) { }
 
   void Push(const VectorXd& estimate, const VectorXd& truth) {
     VectorXd error = (estimate - truth).array().square();

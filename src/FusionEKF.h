@@ -9,13 +9,12 @@
 
 class FusionEKF {
 public:
-  void ProcessMeasurement(const MeasurementPackage &measurement_pack);
-  const VectorXd& GetEstimate() const { return model.GetState(); }
+  const VectorXd& ProcessMeasurement(const MeasurementPackage &measurement_pack);
   
 private:
   static const int noise_axy = 9;
   
-  MotionModel model = MotionModel(noise_axy, noise_axy);
+  MotionModel motion_model = MotionModel(noise_axy, noise_axy);
   LaserMeasurementModel laser;
   RadarMeasurementModel radar;
   

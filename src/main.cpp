@@ -100,8 +100,7 @@ int main()
     	  gt_values(3) = vy_gt;
           
           //Call ProcessMeasurment(meas_package) for Kalman filter
-    	  fusionEKF.ProcessMeasurement(meas_package);    	  
-    	  VectorXd estimate = fusionEKF.GetEstimate();
+    	  const VectorXd& estimate = fusionEKF.ProcessMeasurement(meas_package);    	  
 	  
 	  //Push the current estimated x,y positon from the Kalman filter's state vector
 	  rmse.Push(estimate, gt_values);
