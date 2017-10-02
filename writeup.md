@@ -2,16 +2,16 @@
 
 This project is a part of Udacity's *Self-Driving Car Nanodegree* program. The
 goal of the project is to implement Extended Kalman Filter algoritm that tracks
-the vehicle movement, using noisy radar and laser (LIDAR) measurements as input.
+the vehicle movement, using noisy radar and laser (lidar) measurements as input.
 
 # Introduction
 
-The boilerplate code for the project was provided in a GitHub
-repository(*link*). However, having started implementing the messing pieces, I
-became dissatisfied with the suggested application design. Eventually, I decided
-to come up with my own vision of the application's structure, trying to separate
-different aspects of the algorithm into different entities. I describe the
-design I ended up in the next session.
+The boilerplate code for the project was provided in a
+[GitHub repository](https://github.com/udacity/CarND-Extended-Kalman-Filter-Project). However,
+having started working on it, I became dissatisfied with the suggested
+application design. Eventually, I decided to come up with my own vision of the
+class structure, trying to separate different aspects of the algorithm into
+different entities. I describe the design I ended up in the next session.
 
 I decided to leave the code in `main()` function mostly untouched, as the code
 inside it is mostly infrastructural and did not require significant
@@ -20,7 +20,44 @@ was siginificantly refactored.
 
 # High-level application design
 
+The high-level class application structure can be summarised in the following
+UML diagram: 
+
 ![UML diagram](writeup/app-structure.png)
+
+As before, `ExtendedEKF` class represents a facade that hosts other pieces. Its
+single public method, `ExtendedEKF::PerformMeasurement()`, implements an
+iteration of Kalman filter (in pseudocode):
+
+```
+if (!initialized) {
+	InitializeFilter(measurement);
+} else {
+	PredictVehicleState();
+	UpdateVehicleState(measurement);
+}
+```
+
+Then, 2 other classses, `MotionModel` and `MeasurementModel` play together to
+perform actual predict/update cycle. `MotionModel` is responsible for predicting
+the vehicle state, while `MeasurementModel` performs the calculations required
+to update the state with the incoming measurement. `MeasurmenentModel` is an
+interface that has 2 implementations: `LaserMeasurementModel` and
+`RadarMeasurementModel`. 
+
+`LaserMeasuremenentModel` implements the update step of a regular Kalman
+filter, using lidar measurements *(p<sub>x</sub>, p<sub>y</sub>)* as input. 
+
+`RadarMeasurementModel` is responsible for processing the radar input in polar
+coodinates *(ρ, φ, ρ')*. The specifics of the radar measurements are
+that the function that maps measured values to the vehicle state is non-linear,
+so the regular Kalman filter is not applicable. To process the input,
+`RadarMeasurementModel` implements the Extended Kalman filter update. It uses
+Taylor expansion to linearise the measurement mapping function *z<sub>k</sub> =
+h(x<sub>k</sub>)*.
+
+From a design standpoint, `MeasurementModel` and its subclasses implement
+*Strategy* design pattern for the `MotionModel`.
 
 # Application performance
 
