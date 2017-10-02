@@ -31,10 +31,10 @@ iteration of Kalman filter (in pseudocode):
 
 ```
 if (!initialized) {
-	InitializeFilter(measurement);
+  InitializeFilter(measurement);
 } else {
-	PredictVehicleState();
-	UpdateVehicleState(measurement);
+  PredictVehicleState();
+  UpdateVehicleState(measurement);
 }
 ```
 
