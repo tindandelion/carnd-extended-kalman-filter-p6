@@ -15,7 +15,7 @@ different entities. I describe the design I ended up in the next session.
 
 I decided to leave the code in `main()` function mostly untouched, as the code
 inside it was infrastructural and did not require major modifications. The
-code in `ExtendedEKF` and `KalmanFilter` classes, however, was significantly
+code in `FusionEKF` and `KalmanFilter` classes, however, was significantly
 refactored.
 
 # High-level application design
@@ -25,8 +25,8 @@ UML diagram:
 
 ![UML diagram](writeup/app-structure.png)
 
-As before, `ExtendedEKF` class represents a facade that hosts other pieces. Its
-single public method, `ExtendedEKF::PerformMeasurement()`, implements an
+As before, `FusionEKF` class represents a facade that hosts other pieces. Its
+single public method, `FusionEKF::PerformMeasurement()`, implements an
 iteration of Kalman filter (in pseudocode):
 
 ```
@@ -92,7 +92,7 @@ in the future:
 than radar and laser. From the `MotionModel` standpoint, one would simply need
 to provide an implementation of `MeasurementModel`, specific for a new sensor
 type. However, in order to make use of this implementation in the application,
-one would need to make changes to `ExtendedEKF::SelectModel()` private method.
+one would need to make changes to `FusionEKF::SelectModel()` private method.
 Therefore, one of potential improvements would be decoupling the logic that
 selects a specific sensor model, from the algorithm itself.
 
