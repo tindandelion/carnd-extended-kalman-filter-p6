@@ -26,7 +26,7 @@ UML diagram:
 ![UML diagram](writeup/app-structure.png)
 
 As before, `FusionEKF` class represents a facade that hosts other pieces. Its
-single public method, `FusionEKF::PerformMeasurement()`, implements an
+single public method, `FusionEKF::ProcessMeasurement()`, implements an
 iteration of Kalman filter (in pseudocode):
 
 ```
@@ -48,8 +48,8 @@ interface that has 2 concrete implementations: `LaserMeasurementModel` and
 `LaserMeasuremenentModel` implements the update step of a regular Kalman
 filter, using lidar measurements *(p<sub>x</sub>, p<sub>y</sub>)* as input. 
 
-`RadarMeasurementModel` is responsible for processing the radar input in polar
-coordinates *(ρ, φ, ρ')*. The specifics of the radar measurements are that the
+`RadarMeasurementModel` is responsible for processing radar input in polar
+coordinates *(ρ, φ, ρ')*. The specifics of radar measurements are that the
 function that relates measured values and the vehicle state is non-linear, so
 the regular Kalman filter is not applicable. To process the input,
 `RadarMeasurementModel` implements the Extended Kalman filter update. It uses
@@ -71,7 +71,7 @@ by my application. As the screenshot shows, the application does a pretty
 accurate job to track the vehicle's movements.
 
 The final values for the RMSE with respect to the ground truth values, evaluated
-on the test dataset are: 
+on the test dataset, are: 
 
 |               |       |
 |---------------|-------|
@@ -84,9 +84,9 @@ All values are below the threshold required by the project.
 
 # Future improvements
 
-The design I ended up with is much more modular than the one initially
+The design I ended up with is more modular than the one that was initially
 suggested. There are, however, a few directions in which this design can evolve
-in the future: 
+in the future:
 
 * **Use of additional sensors**. It's quite easy to plug in the sensors other
 than radar and laser. From the `MotionModel` standpoint, one would simply need
