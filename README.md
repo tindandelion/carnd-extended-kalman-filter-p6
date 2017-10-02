@@ -88,13 +88,13 @@ The design I ended up with is more modular than the one that was initially
 suggested. There are, however, a few directions in which this design can evolve
 in the future:
 
-* **Use of additional sensors**. It's quite easy to plug in the sensors other
-than radar and laser. From the `MotionModel` standpoint, one would simply need
-to provide an implementation of `MeasurementModel`, specific for a new sensor
+* **Use of additional sensors**. It's quite easy to plug in sensors other than
+radar and laser. From the `MotionModel` standpoint, one would simply need to
+provide an implementation of `MeasurementModel`, specific for a new sensor
 type. However, in order to make use of this implementation in the application,
 one would need to make changes to `FusionEKF::SelectModel()` private method.
-Therefore, one of potential improvements would be decoupling the logic that
-selects a specific sensor model, from the algorithm itself.
+Therefore, one potential improvement would be to decouple the logic that selects
+a specific sensor model, from the algorithm itself.
 
 * **Algorithm generalization**. Current implementation is very specific to the
 task at hand: the motion model is hard-coded, as well as noise parameters for
